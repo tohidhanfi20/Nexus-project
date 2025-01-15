@@ -19,13 +19,24 @@ pipeline {
             }
         }
 
-        stage('Build and Deploy WAR to Nexus') {
+        stage('Build WAR File') {
+            steps {
+                script {
+                    // Run Maven to create the WAR file
+                    sh """
+                        mvn -s ${MAVEN_SETTINGS} clean package
+                    """
+                }
+            }
+        }
+
+        stage('Deploy WAR to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     script {
-                        // Run Maven build and deploy to Nexus
+                        // Deploy the WAR file to Nexus
                         sh """
-                            mvn -s ${MAVEN_SETTINGS} clean deploy
+                            mvn -s ${MAVEN_SETTINGS} deploy
                         """
                     }
                 }
