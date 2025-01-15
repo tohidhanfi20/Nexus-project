@@ -9,7 +9,8 @@ pipeline {
         WAR_NAME = 'forest-1.0-SNAPSHOT.war'
         NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
         NEXUS_CREDENTIALS_ID = 'nexus-cred'
-        MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
+        TOMCAT_CREDENTIALS_ID = 'tomcat-ssh-credentials'
+        MAVEN_SETTINGS = 'settings.xml'
     }
 
     stages {
@@ -37,6 +38,19 @@ pipeline {
                         // Deploy the WAR file to Nexus
                         sh """
                             mvn -s ${MAVEN_SETTINGS} deploy
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy WAR to Tomcat') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: TOMCAT_CREDENTIALS_ID, usernameVariable: 'TOMCAT_USER', passwordVariable: 'TOMCAT_PASS')]) {
+                    script {
+                        // Use sshpass to copy WAR to Tomcat's webapps folder
+                        sh """
+                            sshpass -p ${TOMCAT_PASS} scp target/${WAR_NAME} ${TOMCAT_USER}@15.207.112.237:/root/tomcat/webapps/
                         """
                     }
                 }
