@@ -9,8 +9,8 @@ pipeline {
         WAR_NAME = 'forest-1.0-SNAPSHOT.war'
         NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
         NEXUS_CREDENTIALS_ID = 'nexus-cred'
-        TOMCAT_CREDENTIALS_ID = 'tomcat-ssh-credentials'  // Reference your Tomcat credentials
-        MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
+        TOMCAT_CREDENTIALS_ID = 'tomcat-ssh-credentials'
+        MAVEN_SETTINGS = 'settings.xml'
     }
 
     stages {
@@ -23,7 +23,6 @@ pipeline {
         stage('Build WAR File') {
             steps {
                 script {
-                    // Run Maven to create the WAR file
                     sh """
                         mvn -s ${MAVEN_SETTINGS} clean package
                     """
@@ -31,11 +30,10 @@ pipeline {
             }
         }
 
-        stage('Deploy WAR to Nexus') {
+        stage('Store WAR file to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     script {
-                        // Deploy the WAR file to Nexus
                         sh """
                             mvn -s ${MAVEN_SETTINGS} deploy
                         """
@@ -44,13 +42,13 @@ pipeline {
             }
         }
 
-        stage('Deploy WAR to Tomcat') {
+        stage('Deploy Application to Tomcat') {
             steps {
-                withCredentials([usernamePassword(credentialsId: TOMCAT_CREDENTIALS_ID, usernameVariable: 'TOMCAT_USER', passwordVariable: 'TOMCAT_PASS')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: TOMCAT_CREDENTIALS_ID, keyFileVariable: 'SSH_PRIVATE_KEY')]) {
                     script {
-                        // Safely pass the password using an environment variable
+                        // Deploy WAR to Tomcat server
                         sh """
-                           sshpass -p \$TOMCAT_PASS ssh -o StrictHostKeyChecking=no \$TOMCAT_USER@15.207.112.237 'scp target/${WAR_NAME} /root/tomcat/webapps/'
+                            sshpass -p \$SSH_PRIVATE_KEY ssh -o StrictHostKeyChecking=no root@15.207.112.237 'scp target/${WAR_NAME} /root/tomcat/webapps/'
                         """
                     }
                 }
