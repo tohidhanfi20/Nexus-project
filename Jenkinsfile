@@ -50,7 +50,7 @@ pipeline {
                     script {
                         // Safely pass the password using an environment variable
                         sh """
-                            sshpass -p \$TOMCAT_PASS scp target/${WAR_NAME} \$TOMCAT_USER@15.207.112.237:/root/tomcat/webapps/
+                           sshpass -p \$TOMCAT_PASS ssh -o StrictHostKeyChecking=no \$TOMCAT_USER@15.207.112.237 'scp target/${WAR_NAME} \$TOMCAT_USER@15.207.112.237:/root/tomcat/webapps/'
                         """
                     }
                 }
