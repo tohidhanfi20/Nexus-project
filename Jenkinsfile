@@ -9,8 +9,8 @@ pipeline {
         WAR_NAME = 'forest-1.0-SNAPSHOT.war'
         NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
         NEXUS_CREDENTIALS_ID = 'nexus-cred'
-        TOMCAT_CREDENTIALS_ID = 'tomcat-ssh-credentials'
-        MAVEN_SETTINGS = 'settings.xml'
+        TOMCAT_CREDENTIALS_ID = 'tomcat-ssh-credentials'  // Reference your Tomcat SSH credentials
+        MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
     }
 
     stages {
@@ -23,6 +23,7 @@ pipeline {
         stage('Build WAR File') {
             steps {
                 script {
+                    // Run Maven to create the WAR file
                     sh """
                         mvn -s ${MAVEN_SETTINGS} clean package
                     """
@@ -30,10 +31,11 @@ pipeline {
             }
         }
 
-        stage('Store WAR file to Nexus') {
+        stage('Deploy WAR to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     script {
+                        // Deploy the WAR file to Nexus
                         sh """
                             mvn -s ${MAVEN_SETTINGS} deploy
                         """
@@ -42,11 +44,11 @@ pipeline {
             }
         }
 
-        stage('Deploy Application to Tomcat') {
+        stage('Deploy WAR to Tomcat') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: TOMCAT_CREDENTIALS_ID, keyFileVariable: 'SSH_PRIVATE_KEY')]) {
                     script {
-                        // Deploy WAR to Tomcat server
+                        // Deploy WAR to Tomcat server using the SSH key
                         sh """
                             sshpass -p \$SSH_PRIVATE_KEY ssh -o StrictHostKeyChecking=no root@15.207.112.237 'scp target/${WAR_NAME} /root/tomcat/webapps/'
                         """
