@@ -13,7 +13,7 @@ pipeline {
         GIT_CREDENTIALS_ID = 'git-cred' // Define Git credentials ID here
         SSH_CREDENTIALS_ID = 'ssh-cred-tomcat' // Jenkins credentials for tomcat user
         TOMCAT_SERVER = '172.31.2.124' // Private IP of your Tomcat server
-        TOMCAT_WEBAPPS_PATH = '/root/tomcat/webapps' // Path to webapps
+        TOMCAT_WEBAPPS_PATH = '/home/tomcat/tomcat/webapps' // Path to webapps
     }
 
     stages {
@@ -66,7 +66,7 @@ pipeline {
                     script {
                         // Restart Tomcat after deployment
                         sh """
-                            ssh -o StrictHostKeyChecking=no -i \$SSH_KEY ${SSH_USER}@${TOMCAT_SERVER} 'systemctl restart tomcat'
+                            ssh -o StrictHostKeyChecking=no -i \$SSH_KEY ${SSH_USER}@${TOMCAT_SERVER} 'sudo systemctl restart tomcat'
                         """
                     }
                 }
