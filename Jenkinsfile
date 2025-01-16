@@ -53,7 +53,7 @@ pipeline {
                     script {
                         // Transfer WAR file to Tomcat server's webapps directory
                         sh """
-                            scp -i ${SSH_KEY} target/${WAR_NAME} ${SSH_USER}@${TOMCAT_SERVER}:${TOMCAT_WEBAPPS_PATH}/
+                            scp -o StrictHostKeyChecking=no -i \$SSH_KEY target/${WAR_NAME} ${SSH_USER}@${TOMCAT_SERVER}:${TOMCAT_WEBAPPS_PATH}/
                         """
                     }
                 }
@@ -66,7 +66,7 @@ pipeline {
                     script {
                         // Restart Tomcat after deployment
                         sh """
-                            ssh -i ${SSH_KEY} ${SSH_USER}@${TOMCAT_SERVER} 'systemctl restart tomcat'
+                            ssh -o StrictHostKeyChecking=no -i \$SSH_KEY ${SSH_USER}@${TOMCAT_SERVER} 'systemctl restart tomcat'
                         """
                     }
                 }
