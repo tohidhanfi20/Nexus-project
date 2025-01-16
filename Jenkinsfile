@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         WAR_NAME = 'forest-1.0-SNAPSHOT.war'
-        NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
+        NEXUS_URL = 'http://65.0.18.51:8081/repository/maven-releases/'
         NEXUS_CREDENTIALS_ID = 'nexus-cred'
         MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
         GIT_CREDENTIALS_ID = 'git-cred' // Define Git credentials ID here
