@@ -11,6 +11,9 @@ pipeline {
         NEXUS_CREDENTIALS_ID = 'nexus-cred'
         MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
         GIT_CREDENTIALS_ID = 'git-cred' // Define Git credentials ID here
+        SSH_CREDENTIALS_ID = 'ssh-cred-tomcat' // Jenkins credentials for tomcat user
+        TOMCAT_SERVER = '172.31.2.124' // Private IP of your Tomcat server
+        TOMCAT_WEBAPPS_PATH = '/root/tomcat/webapps' // Path to webapps
     }
 
     stages {
@@ -38,6 +41,32 @@ pipeline {
                         // Deploy the WAR file to Nexus
                         sh """
                             mvn -s ${MAVEN_SETTINGS} deploy
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Transfer WAR to Tomcat Server') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                    script {
+                        // Transfer WAR file to Tomcat server's webapps directory
+                        sh """
+                            scp -i ${SSH_KEY} target/${WAR_NAME} ${SSH_USER}@${TOMCAT_SERVER}:${TOMCAT_WEBAPPS_PATH}/
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Restart Tomcat') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                    script {
+                        // Restart Tomcat after deployment
+                        sh """
+                            ssh -i ${SSH_KEY} ${SSH_USER}@${TOMCAT_SERVER} 'systemctl restart tomcat'
                         """
                     }
                 }
