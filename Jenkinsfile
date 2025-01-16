@@ -6,17 +6,17 @@ pipeline {
     }
 
     environment {
-    WAR_NAME = 'forest-1.0-SNAPSHOT.war'
-    NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
-    NEXUS_CREDENTIALS_ID = 'nexus-cred'
-    MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
-    GIT_CREDENTIALS_ID = 'git-cred' // Define Git credentials ID here
+        WAR_NAME = 'forest-1.0-SNAPSHOT.war'
+        NEXUS_URL = 'http://13.232.84.241:8081/repository/maven-releases/'
+        NEXUS_CREDENTIALS_ID = 'nexus-cred'
+        MAVEN_SETTINGS = 'settings.xml' // Path to your custom settings.xml for Maven
+        GIT_CREDENTIALS_ID = 'git-cred' // Define Git credentials ID here
     }
 
     stages {
         stage('Checkout Code from GitHub') {
             steps {
-                git credentialsId: 'git-cred', url: 'https://github.com/tohidhanfi20/Nexus-project.git', branch: 'main'
+                git credentialsId: env.GIT_CREDENTIALS_ID, url: 'https://github.com/tohidhanfi20/Nexus-project.git', branch: 'main'
             }
         }
 
